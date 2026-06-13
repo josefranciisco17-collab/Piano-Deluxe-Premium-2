@@ -22,9 +22,10 @@
 </div>
 
 <script type="module">
-import { db, storage } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
+getFirestore,
 collection,
 addDoc,
 getDocs,
@@ -33,10 +34,24 @@ where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
+getStorage,
 ref,
 uploadBytes,
 getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
+authDomain: "piano-deluxe-premium.firebaseapp.com",
+projectId: "piano-deluxe-premium",
+storageBucket: "piano-deluxe-premium.firebasestorage.app",
+messagingSenderId: "79307845171",
+appId: "1:79307845171:web:c21918694f6d916fbbfd46"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 const midiFile = document.getElementById("midiFile");
 const midiName = document.getElementById("midiName");
@@ -48,13 +63,15 @@ midiList.innerHTML = "";
 
 const snapshot = await getDocs(collection(db, "midis"));
 
-snapshot.forEach((doc) => {
-const data = doc.data();
+snapshot.forEach((docSnap) => {
+const data = docSnap.data();
 
 const item = document.createElement("div");
 item.className = "midi-item";
+
 item.innerHTML = &lt;p&gt;${data.name}</p>
 <a href="${data.url}" target="_blank"&gt;Ver archivo&lt;/a&gt;;
+
 midiList.appendChild(item);
 });
 }
@@ -82,7 +99,7 @@ where("filename", "==", file.name)
 const duplicateSnap = await getDocs(duplicateQuery);
 
 if (!duplicateSnap.empty) {
-alert("Ese MIDI ya existe en la biblioteca");
+alert("Ese MIDI ya existe");
 return;
 }
 
@@ -93,7 +110,7 @@ await uploadBytes(storageRef, file);
 const downloadURL = await getDownloadURL(storageRef);
 
 await addDoc(collection(db, "midis"), {
-name: name,
+name,
 filename: file.name,
 url: downloadURL,
 createdAt: Date.now()
