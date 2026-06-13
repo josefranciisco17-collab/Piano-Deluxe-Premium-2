@@ -3,50 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Menú Principal</title>
+<title>Menú</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
+<div class="menu-container">
 <h1>Piano Deluxe Premium</h1>
 
-<div class="creator">
-Desarrollado por JFAM & Co. Piano Studio
+<button onclick="location.href='piano.html'">🎹 Abrir Piano</button>
 </div>
-
-<button onclick="location.href='piano.html'">
-🎹 Tocar Piano
-</button>
-
-<button onclick="location.href='midis.html'">
-🎼 Mis Canciones MIDIs
-</button>
-
-<button onclick="location.href='admin.html'">
-⚙ Admin Console
-</button>
-
-<button id="logoutBtn">
-🚪 Cerrar sesión
-</button>
-
-</div>
-
-<script type="module">
-
-import { auth } from "./firebase-config.js";
-
-import {
-signOut
-} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-
-logoutBtn.onclick=async()=>{
-await signOut(auth);
-location.href="index.html";
-};
-
-</script>
 
 </body>
 </html>

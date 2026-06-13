@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piano Deluxe Premium - Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-container">
+<h1>Piano Deluxe Premium</h1>
+<p>Desarrollado por JFAM & Co. Piano Studio</p>
+
+<input type="email" id="email" placeholder="Correo">
+<input type="password" id="password" placeholder="Contraseña">
+
+<button id="loginBtn">Iniciar sesión</button>
+<button id="registerBtn">Crear cuenta</button>
+<button id="googleBtn">Continuar con Google</button>
+
+<a href="#">¿Olvidaste tu contraseña?</a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+getAuth,
+signInWithEmailAndPassword,
+createUserWithEmailAndPassword,
+GoogleAuthProvider,
+signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
+authDomain: "piano-deluxe-premium.firebaseapp.com",
+projectId: "piano-deluxe-premium",
+storageBucket: "piano-deluxe-premium.firebasestorage.app",
+messagingSenderId: "79307845171",
+appId: "1:79307845171:web:c21918694f6d916fbbfd46"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginBtn").onclick = async () => {
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+try {
+await signInWithEmailAndPassword(auth, email, password);
+window.location.href = "menu.html";
+} catch (error) {
+alert(error.message);
+}
+};
+
+document.getElementById("registerBtn").onclick = async () => {
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+try {
+await createUserWithEmailAndPassword(auth, email, password);
+alert("Cuenta creada");
+} catch (error) {
+alert(error.message);
+}
+};
+
+document.getElementById("googleBtn").onclick = async () => {
+const provider = new GoogleAuthProvider();
+
+try {
+await signInWithPopup(auth, provider);
+window.location.href = "menu.html";
+} catch (error) {
+alert(error.message);
+}
+};
+</script>
+
+</body>
+</html>
