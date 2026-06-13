@@ -2,44 +2,25 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Piano Deluxe Premium - Login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Piano Deluxe Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-
+<div class="login-container">
 <h1>Piano Deluxe Premium</h1>
+<p>Desarrollado por JFAM & Co. Piano Studio</p>
 
-<p class="creator">
-Desarrollado por JFAM & Co. Piano Studio
-</p>
-
-<input type="email" id="email" placeholder="Correo electrónico">
-
+<input type="email" id="email" placeholder="Correo">
 <input type="password" id="password" placeholder="Contraseña">
 
-<button id="loginBtn">
-Iniciar sesión
-</button>
-
-<button id="registerBtn">
-Crear cuenta
-</button>
-
-<button id="googleBtn">
-Continuar con Google
-</button>
-
-<span class="link">
-¿Olvidaste tu contraseña?
-</span>
-
+<button onclick="login()">Iniciar sesión</button>
+<button onclick="register()">Crear cuenta</button>
+<button onclick="googleLogin()">Continuar con Google</button>
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
@@ -54,79 +35,52 @@ const firebaseConfig = {
 apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
 authDomain: "piano-deluxe-premium.firebaseapp.com",
 projectId: "piano-deluxe-premium",
-storageBucket: "piano-deluxe-premium.firebasestorage.app",
-messagingSenderId: "79307845171",
-appId: "1:79307845171:web:c21918694f6d916fbbfd46"
+storageBucket: "piano-deluxe-premium.firebasestorage.app"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-
-const email = emailInput.value.trim();
-const password = passwordInput.value.trim();
-
-if(!email || !password){
-alert("Completa todos los campos");
-return;
-}
-
+window.login = async ()=>{
 try{
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
 await signInWithEmailAndPassword(auth,email,password);
 
-alert("Inicio de sesión exitoso");
+window.location.href="piano.html";
 
-window.location.href = "menu.html";
-
-}catch(error){
-alert(error.message);
+}catch(e){
+alert(e.message);
 }
+};
 
-});
-
-document.getElementById("registerBtn").addEventListener("click", async () => {
-
-const email = emailInput.value.trim();
-const password = passwordInput.value.trim();
-
-if(!email || !password){
-alert("Completa todos los campos");
-return;
-}
-
+window.register = async ()=>{
 try{
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
 await createUserWithEmailAndPassword(auth,email,password);
 
-alert("Cuenta creada correctamente");
+alert("Cuenta creada");
 
-}catch(error){
-alert(error.message);
+}catch(e){
+alert(e.message);
 }
+};
 
-});
-
-document.getElementById("googleBtn").addEventListener("click", async () => {
-
+window.googleLogin = async ()=>{
 try{
-
-const provider = new GoogleAuthProvider();
+const provider=new GoogleAuthProvider();
 
 await signInWithPopup(auth,provider);
 
-alert("Inicio con Google exitoso");
+window.location.href="piano.html";
 
-window.location.href = "menu.html";
-
-}catch(error){
-alert(error.message);
+}catch(e){
+alert(e.message);
 }
-
-});
-
+};
 </script>
 
 </body>
