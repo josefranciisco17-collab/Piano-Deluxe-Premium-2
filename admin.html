@@ -155,7 +155,9 @@ import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+console.log("Firestore conectado");
 window.viewPlayers = async function(){
+console.log("Botón viewPlayers ejecutado");
 const snapshot = await getDocs(collection(db,"users"));
 
 let lista = "";
