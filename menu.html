@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Menu</title>
+<style>
+body{
+background:#111;
+color:white;
+font-family:Arial;
+text-align:center;
+padding:40px;
+}
+button{
+padding:15px 30px;
+margin:15px;
+border:none;
+border-radius:15px;
+background:#222;
+color:white;
+font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<h1>Menu Piano Deluxe</h1>
+
+<button onclick="location.href='index.html'">Entrar al Piano</button>
+
+<button onclick="location.href='admin.html'">Panel Admin</button>
+
+<button id="logoutBtn">Cerrar sesión</button>
+
+<script type="module">
+import { auth } from "./firebase-config.js";
+import {
+signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+document.getElementById("logoutBtn").onclick=async()=>{
+await signOut(auth);
+location.href="login.html";
+};
+</script>
+
+</body>
+</html>

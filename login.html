@@ -2,84 +2,48 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Piano Deluxe Login</title>
-<link rel="stylesheet" href="style.css">
+<title>Login Piano Deluxe</title>
+<style>
+body{
+background:#111;
+color:white;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+flex-direction:column;
+}
+button{
+padding:15px 30px;
+margin:10px;
+border:none;
+border-radius:15px;
+background:#222;
+color:white;
+font-size:18px;
+}
+</style>
 </head>
 <body>
 
-<div class="login-container">
-<h1>Piano Deluxe Premium</h1>
-<p>Desarrollado por JFAM & Co. Piano Studio</p>
+<h1>Piano Deluxe Login</h1>
 
-<input type="email" id="email" placeholder="Correo">
-<input type="password" id="password" placeholder="Contraseña">
-
-<button onclick="login()">Iniciar sesión</button>
-<button onclick="register()">Crear cuenta</button>
-<button onclick="googleLogin()">Continuar con Google</button>
-</div>
+<button id="googleLogin">Entrar con Google</button>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+auth,
+provider
+} from "./firebase-config.js";
 
 import {
-getAuth,
-signInWithEmailAndPassword,
-createUserWithEmailAndPassword,
-GoogleAuthProvider,
 signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
-authDomain: "piano-deluxe-premium.firebaseapp.com",
-projectId: "piano-deluxe-premium",
-storageBucket: "piano-deluxe-premium.firebasestorage.app"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-window.login = async ()=>{
-try{
-const email=document.getElementById("email").value;
-const password=document.getElementById("password").value;
-
-await signInWithEmailAndPassword(auth,email,password);
-
-window.location.href="piano.html";
-
-}catch(e){
-alert(e.message);
-}
-};
-
-window.register = async ()=>{
-try{
-const email=document.getElementById("email").value;
-const password=document.getElementById("password").value;
-
-await createUserWithEmailAndPassword(auth,email,password);
-
-alert("Cuenta creada");
-
-}catch(e){
-alert(e.message);
-}
-};
-
-window.googleLogin = async ()=>{
-try{
-const provider=new GoogleAuthProvider();
-
+document.getElementById("googleLogin").onclick=async()=>{
 await signInWithPopup(auth,provider);
-
-window.location.href="piano.html";
-
-}catch(e){
-alert(e.message);
-}
+location.href="menu.html";
 };
 </script>
 
