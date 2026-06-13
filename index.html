@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Piano Deluxe Yamaha Premium</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi"></script>
 
 <style>
 body{
@@ -75,6 +75,7 @@ border-left:2px solid #000;
 border-right:2px solid #000;
 border-bottom:2px solid #000;
 position:relative;
+box-shadow:inset 0 0 8px rgba(255,255,255,.8);
 box-sizing:border-box;
 border-radius:0 0 8px 8px;
 transition:.05s;
@@ -85,6 +86,42 @@ transform:translateY(2px);
 background:#d0d0d0;
 }
 
+.key.left-hand{
+background:
+linear-gradient(
+to bottom,
+#7fd8ff 0%,
+#4fc3ff 45%,
+#dff8ff 100%
+);
+
+box-shadow:
+0 0 18px rgba(0,180,255,.85),
+0 0 35px rgba(0,180,255,.55),
+0 0 55px rgba(0,180,255,.25);
+
+border-left:2px solid #3bbcff;
+border-right:2px solid #3bbcff;
+}
+
+.key.right-hand{
+background:
+linear-gradient(
+to bottom,
+#ffe98a 0%,
+#ffd54f 45%,
+#fff8d0 100%
+);
+
+box-shadow:
+0 0 18px rgba(255,215,80,.85),
+0 0 35px rgba(255,215,80,.55),
+0 0 55px rgba(255,215,80,.25);
+
+border-left:2px solid #ffcf33;
+border-right:2px solid #ffcf33;
+}
+
 .black{
 position:absolute;
 width:24px;
@@ -93,11 +130,16 @@ background:linear-gradient(to right,#1f1f1f,#000,#111);
 z-index:2;
 margin-left:-12px;
 border:1px solid #000;
+box-shadow:inset 0 0 4px rgba(255,255,255,0.2);
 border-radius:0 0 6px 6px;
 }
 
-.black.active{
-background:#333;
+.black.left-hand{
+background:#0b4f70;
+}
+
+.black.right-hand{
+background:#7a5a00;
 }
 
 .label{
@@ -111,17 +153,22 @@ color:#eee;
 }
 
 @media(max-width:700px){
+body{
+padding:10px;
+}
+h2{
+font-size:38px;
+margin-bottom:10px;
+}
 .key{
 width:32px;
 height:180px;
 }
-
 .black{
 width:20px;
 height:105px;
 margin-left:-10px;
 }
-
 button,label{
 font-size:11px;
 padding:8px 12px;
@@ -132,21 +179,29 @@ padding:8px 12px;
 
 <body>
 
-<h2>Piano Deluxe</h2>
-<div style="margin-bottom:14px;font-size:14px;color:#d0d0d0">
+<h2 id="mainTitle" style="margin-bottom:5px;">
+Piano Deluxe
+</h2>
+
+<div id="brandText" style="margin-bottom:14px;font-size:14px;color:#d0d0d0">
 Desarrollado por JFAM & Co. Piano Studio
 </div>
 
-<div class="controls">
+<div class="controls" id="controlsBox">
+
 <button id="pedal">Sustain OFF</button>
 <button id="lockBtn">🔓 Scroll</button>
 
-<label for="midiFile">Seleccionar MIDI</label>
+<label for="midiFile">
+Seleccionar MIDI
+</label>
+
 <input type="file" id="midiFile" accept=".mid,.midi">
 
 <button id="playMidi">▶ Reproducir</button>
 <button id="pauseMidi">⏸ Pausar</button>
 <button id="continueMidi">⏩ Continuar</button>
+
 </div>
 
 <div class="piano-container" id="container">
@@ -154,34 +209,65 @@ Desarrollado por JFAM & Co. Piano Studio
 </div>
 
 <script>
+
+const AudioContextClass=
+window.AudioContext||
+window.webkitAudioContext;
+
+let audioCtx;
 let sustain=false;
 let locked=false;
+const cache={};
 let midiData=null;
 let midiTimeouts=[];
 let paused=false;
 let pauseTime=0;
 let startTime=0;
 
-const cache={};
-let audioCtx;
+const mainTitle=document.getElementById("mainTitle");
+const brandText=document.getElementById("brandText");
+const controlsBox=document.getElementById("controlsBox");
 
-const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+function hideUI(){
+mainTitle.style.display="none";
+brandText.style.display="none";
+controlsBox.style.display="none";
+}
+
+function showUI(){
+mainTitle.style.display="block";
+brandText.style.display="block";
+controlsBox.style.display="flex";
+}
+
+function clearAllLights(){
+document.querySelectorAll(".key")
+.forEach(key=>{
+key.classList.remove(
+"left-hand",
+"right-hand"
+);
+});
+}
 
 function initAudio(){
-if(!audioCtx){
+if(!audioCtx)
 audioCtx=new AudioContextClass();
-}
 }
 
 document.getElementById("pedal").onclick=()=>{
 sustain=!sustain;
-document.getElementById("pedal").textContent="Sustain "+(sustain?"ON":"OFF");
+document.getElementById("pedal").textContent=
+"Sustain "+(sustain?"ON":"OFF");
 };
 
 document.getElementById("lockBtn").onclick=()=>{
 locked=!locked;
-document.getElementById("container").style.overflowX=locked?"hidden":"auto";
-document.getElementById("lockBtn").textContent=locked?"🔒 Lock":"🔓 Scroll";
+document.getElementById("container").style.overflowX=
+locked?"hidden":"auto";
+
+document.getElementById("lockBtn").textContent=
+locked?"🔒 Lock":"🔓 Scroll";
 };
 
 const SAMPLE_NOTES=[
@@ -192,14 +278,20 @@ const SAMPLE_NOTES=[
 ];
 
 function noteToMidi(name){
-const map={C:0,Cs:1,D:2,Ds:3,E:4,F:5,Fs:6,G:7,Gs:8,A:9,As:10,B:11};
+const map={
+C:0,Cs:1,D:2,Ds:3,E:4,
+F:5,Fs:6,G:7,Gs:8,A:9,
+As:10,B:11
+};
+
 const m=name.match(/^([A-G]s?)(\d)$/);
+
 return (parseInt(m[2])+1)*12+map[m[1]];
 }
 
 function getBestSample(noteId){
 const midi=noteId+21;
-let best=SAMPLE_NOTES[0],diff=999;
+let best=SAMPLE_NOTES[0], diff=999;
 
 for(const s of SAMPLE_NOTES){
 const d=Math.abs(midi-noteToMidi(s));
@@ -209,7 +301,8 @@ best=s;
 }
 }
 
-const semitones=midi-noteToMidi(best);
+const semitones=
+midi-noteToMidi(best);
 
 return{
 file:`audio/${best}v8.mp3`,
@@ -239,6 +332,8 @@ src.buffer=buffer;
 src.playbackRate.value=s.rate;
 
 const gain=audioCtx.createGain();
+gain.gain.value=1.0;
+
 src.connect(gain);
 gain.connect(audioCtx.destination);
 
@@ -253,18 +348,23 @@ src.stop(audioCtx.currentTime+1.6);
 }
 }
 
-const names=["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
-const keyboard=document.getElementById("keyboard");
+const names=[
+"Do","Do#","Re","Re#",
+"Mi","Fa","Fa#","Sol",
+"Sol#","La","La#","Si"
+];
 
+const keyboard=document.getElementById("keyboard");
 let white=0;
 
 for(let i=0;i<88;i++){
+
 const note=(i+9)%12;
 const oct=Math.floor((i+9)/12);
-const isBlack=names[note].includes("#");
+const black=names[note].includes("#");
 
 const key=document.createElement("div");
-key.className="key"+(isBlack?" black":"");
+key.className="key"+(black?" black":"");
 key.dataset.note=i;
 
 const label=document.createElement("span");
@@ -273,13 +373,13 @@ label.textContent=names[note]+oct;
 
 key.appendChild(label);
 
-if(isBlack){
+if(black){
 key.style.left=(white*38)+"px";
 }else{
 white++;
 }
 
-key.addEventListener("pointerdown",()=>{
+key.addEventListener("pointerdown",async()=>{
 key.classList.add("active");
 playNote(i);
 
@@ -291,51 +391,91 @@ key.classList.remove("active");
 keyboard.appendChild(key);
 }
 
-document.getElementById("midiFile").addEventListener("change",async(e)=>{
+document.getElementById("midiFile")
+.addEventListener("change",async(e)=>{
+
 const file=e.target.files[0];
-if(!file) return;
+if(!file)return;
 
 const buffer=await file.arrayBuffer();
 midiData=new Midi(buffer);
 
 alert("MIDI cargado");
+
 });
 
 function clearMidi(){
-midiTimeouts.forEach(t=>clearTimeout(t));
+midiTimeouts.forEach(
+t=>clearTimeout(t)
+);
+
 midiTimeouts=[];
+showUI();
 }
 
 function scheduleMidi(offset=0){
-if(!midiData) return;
+
+if(!midiData)return;
 
 startTime=Date.now()-offset*1000;
 
 midiData.tracks.forEach(track=>{
+
 track.notes.forEach(n=>{
-if(n.time<offset) return;
+
+if(n.time<offset)return;
 
 const noteId=n.midi-21;
 
 const timeout=setTimeout(()=>{
-const key=document.querySelector(`[data-note="${noteId}"]`);
+
+const key=document.querySelector(
+'[data-note="'+noteId+'"]'
+);
 
 if(key){
+
 key.classList.add("active");
+
+if(noteId<39){
+key.classList.add("left-hand");
+}else{
+key.classList.add("right-hand");
+}
+
 playNote(noteId);
 
 setTimeout(()=>{
-key.classList.remove("active");
-},n.duration*1000);
+
+key.classList.remove(
+"active",
+"left-hand",
+"right-hand"
+);
+
+if(n===track.notes[
+track.notes.length-1
+]){
+clearAllLights();
+showUI();
 }
+
+},n.duration*1000);
+
+}
+
 },(n.time-offset)*1000);
 
 midiTimeouts.push(timeout);
+
 });
+
 });
+
 }
 
 document.getElementById("playMidi").onclick=()=>{
+
 if(!midiData){
 alert("Selecciona un MIDI");
 return;
@@ -343,23 +483,35 @@ return;
 
 clearMidi();
 pauseTime=0;
+hideUI();
 scheduleMidi(0);
 paused=false;
+
 };
 
 document.getElementById("pauseMidi").onclick=()=>{
+
 clearMidi();
-pauseTime=(Date.now()-startTime)/1000;
+clearAllLights();
+
+pauseTime=
+(Date.now()-startTime)/1000;
+
 paused=true;
+
 };
 
 document.getElementById("continueMidi").onclick=()=>{
-if(!paused) return;
+
+if(!paused)return;
 
 clearMidi();
+hideUI();
 scheduleMidi(pauseTime);
 paused=false;
+
 };
+
 </script>
 
 </body>
