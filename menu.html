@@ -9,169 +9,181 @@
 body{
 margin:0;
 font-family:Arial,sans-serif;
-background:linear-gradient(135deg,#000,#111,#1a1a1a);
+background:#000;
 color:white;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
+min-height:100vh;
 }
 
-.card{
+.container{
 width:90%;
-max-width:430px;
-padding:30px;
-border-radius:30px;
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(20px);
-box-shadow:0 0 35px rgba(255,255,255,0.08);
+max-width:420px;
+padding:25px;
+border-radius:35px;
+background:linear-gradient(145deg,#111,#1d1d1d);
+box-shadow:0 0 30px rgba(255,255,255,.08);
 text-align:center;
-border:1px solid rgba(255,255,255,0.08);
 }
 
 .profile-pic{
-width:110px;
-height:110px;
+width:180px;
+height:180px;
 border-radius:50%;
 object-fit:cover;
-border:3px solid white;
-cursor:pointer;
-margin-bottom:15px;
-}
-
-input[type=file]{
-display:none;
-}
-
-h2{
-margin:8px 0;
-}
-
-p{
-color:#bbb;
-margin:5px 0;
-}
-
-.stats{
-margin:20px 0;
-padding:15px;
-border-radius:18px;
-background:rgba(255,255,255,0.04);
+border:6px solid white;
+margin-bottom:20px;
 }
 
 button{
-width:100%;
-padding:15px;
+width:80%;
+padding:14px;
 margin:8px 0;
 border:none;
 border-radius:18px;
-font-size:16px;
+font-size:17px;
 font-weight:bold;
 cursor:pointer;
-transition:.2s;
 }
 
-button:hover{
-transform:scale(1.02);
-}
-
-.btn-piano{
+.white-btn{
 background:white;
 color:black;
 }
 
-.btn-admin{
-background:#222;
-color:white;
-}
-
-.btn-logout{
+.dark-btn{
 background:#111;
 color:white;
-border:1px solid #333;
 }
 
-.footer{
+input{
+width:70%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:14px;
+background:#111;
+color:white;
+font-size:18px;
+text-align:center;
+}
+
+.email{
+margin:18px 0;
+font-size:18px;
+color:#ddd;
+}
+
+.stats{
+width:80%;
+padding:15px;
+margin:15px auto;
+border-radius:16px;
+background:rgba(255,255,255,0.08);
+font-size:18px;
+line-height:1.5;
+}
+
+.brand{
 margin-top:20px;
-font-size:14px;
+font-size:15px;
 color:#bdbdbd;
 }
 </style>
 </head>
 <body>
 
-<div class="card">
+<div class="container">
 
-<label for="profileInput">
-<img id="profilePic" class="profile-pic"
-src="https://via.placeholder.com/110">
-</label>
+<img id="profilePic" class="profile-pic" src="" alt="Foto">
 
-<input type="file" id="profileInput" accept="image/*">
+<br>
 
-<h2 id="userName">Usuario</h2>
-<p id="userEmail">correo@email.com</p>
+<input type="file" id="profileInput" hidden>
+
+<button class="white-btn" onclick="document.getElementById('profileInput').click()">
+Editar foto
+</button>
+
+<button class="white-btn" id="savePhotoBtn">
+Guardar foto
+</button>
+
+<input type="text" id="displayName" placeholder="Tu nombre">
+
+<button class="white-btn" id="saveNameBtn">
+Guardar nombre
+</button>
+
+<div class="email" id="userEmail"></div>
 
 <div class="stats">
-<p>🏆 Rango: <span id="rank">Principiante</span></p>
-<p>🎯 Récord: <span id="score">0</span></p>
+🏆 Rango: Principiante <br>
+🎯 Récord: 0
 </div>
 
-<button class="btn-piano" onclick="location.href='index.html'">
+<button class="white-btn" onclick="location.href='index.html'">
 Entrar al Piano
 </button>
 
-<button class="btn-admin" onclick="location.href='admin.html'">
+<button class="dark-btn" onclick="openAdmin()">
 Panel Admin
 </button>
 
-<button class="btn-logout" id="logoutBtn">
+<button class="dark-btn" id="logoutBtn">
 Cerrar sesión
 </button>
 
-<div class="footer">
+<div class="brand">
 Desarrollado por JFAM & Co. Piano Studios.
 </div>
 
 </div>
 
 <script type="module">
-
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-auth,
-storage,
-db
-} from "./firebase-config.js";
-
-import {
+getAuth,
 onAuthStateChanged,
 signOut,
 updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-ref,
-uploadBytes,
-getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-import {
+getFirestore,
 doc,
 setDoc,
 getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const profilePic =
-document.getElementById("profilePic");
+import {
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-const profileInput =
-document.getElementById("profileInput");
+const firebaseConfig = {
+apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
+authDomain: "piano-deluxe-premium.firebaseapp.com",
+projectId: "piano-deluxe-premium",
+storageBucket: "piano-deluxe-premium.firebasestorage.app",
+messagingSenderId: "79307845171",
+appId: "1:79307845171:web:c21918694f6d916fbbfd46"
+};
 
-const userName =
-document.getElementById("userName");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-const userEmail =
-document.getElementById("userEmail");
+const profilePic = document.getElementById("profilePic");
+const profileInput = document.getElementById("profileInput");
+const userEmail = document.getElementById("userEmail");
+const displayName = document.getElementById("displayName");
+
+let selectedFile = null;
 
 onAuthStateChanged(auth, async(user)=>{
 
@@ -180,42 +192,52 @@ location.href="login.html";
 return;
 }
 
-userName.textContent =
-user.displayName || "Usuario";
+userEmail.textContent = user.email;
 
-userEmail.textContent =
-user.email;
+const userDoc = await getDoc(doc(db,"users",user.uid));
 
-if(user.photoURL){
-profilePic.src = user.photoURL;
-}
-
-const userRef = doc(db,"users",user.uid);
-const userSnap = await getDoc(userRef);
-
-if(userSnap.exists()){
-const data = userSnap.data();
+if(userDoc.exists()){
+const data = userDoc.data();
 
 if(data.customPhoto){
 profilePic.src = data.customPhoto;
 }
+
+if(data.customName){
+displayName.value = data.customName;
+}else{
+displayName.value = user.displayName || "";
+}
+}else{
+profilePic.src = user.photoURL || "";
+displayName.value = user.displayName || "";
 }
 
 });
 
-profileInput.addEventListener("change", async(e)=>{
+profileInput.addEventListener("change",(e)=>{
+selectedFile = e.target.files[0];
 
-const file = e.target.files[0];
+if(selectedFile){
+profilePic.src = URL.createObjectURL(selectedFile);
+}
+});
+
+document.getElementById("savePhotoBtn").onclick = async()=>{
+
 const user = auth.currentUser;
 
-if(!file || !user) return;
+if(!selectedFile || !user){
+alert("Selecciona una foto primero");
+return;
+}
 
 const storageRef = ref(
 storage,
 "profile_pictures/"+user.uid
 );
 
-await uploadBytes(storageRef,file);
+await uploadBytes(storageRef,selectedFile);
 
 const photoURL =
 await getDownloadURL(storageRef);
@@ -232,11 +254,33 @@ customPhoto:photoURL
 {merge:true}
 );
 
-profilePic.src = photoURL;
+alert("Foto guardada correctamente 📸");
+};
 
-alert("Foto actualizada correctamente 📸");
+document.getElementById("saveNameBtn").onclick = async()=>{
 
+const user = auth.currentUser;
+const newName = displayName.value.trim();
+
+if(!newName){
+alert("Ingresa un nombre");
+return;
+}
+
+await updateProfile(user,{
+displayName:newName
 });
+
+await setDoc(
+doc(db,"users",user.uid),
+{
+customName:newName
+},
+{merge:true}
+);
+
+alert("Nombre guardado correctamente ✍️");
+};
 
 document.getElementById("logoutBtn")
 .onclick = async()=>{
@@ -246,14 +290,21 @@ await signOut(auth);
 location.href="login.html";
 
 };
+window.openAdmin = function(){
 
-const msg = localStorage.getItem("loginSuccess");
+const defaultPass = "Flor 7272";
+const savedPass =
+localStorage.getItem("adminPassword") || defaultPass;
 
-if(msg){
-alert(msg);
-localStorage.removeItem("loginSuccess");
+const pass = prompt("Ingrese contraseña Admin:");
+
+if(pass === savedPass){
+location.href = "admin.html";
+}else{
+alert("Contraseña incorrecta");
 }
 
+};
 </script>
 
 </body>
