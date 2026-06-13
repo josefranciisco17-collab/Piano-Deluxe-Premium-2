@@ -2,49 +2,105 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Login Piano Deluxe</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Piano Deluxe Login</title>
+
 <style>
 body{
-background:#111;
-color:white;
-font-family:Arial;
+margin:0;
+height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-flex-direction:column;
-}
-button{
-padding:15px 30px;
-margin:10px;
-border:none;
-border-radius:15px;
-background:#222;
+background:
+linear-gradient(135deg,#0f0f0f,#1b1b1b,#101010);
+font-family:Segoe UI;
 color:white;
-font-size:18px;
+}
+
+.card{
+width:90%;
+max-width:380px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(14px);
+padding:35px;
+border-radius:24px;
+text-align:center;
+box-shadow:
+0 15px 40px rgba(0,0,0,.5);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+font-size:38px;
+margin-bottom:10px;
+}
+
+h1{
+margin:0;
+font-size:28px;
+}
+
+p{
+color:#aaa;
+font-size:14px;
+margin:10px 0 25px;
+}
+
+button{
+width:100%;
+padding:15px;
+border:none;
+border-radius:16px;
+background:#ffffff;
+color:#111;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:.2s;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+.footer{
+margin-top:20px;
+font-size:12px;
+color:#888;
 }
 </style>
 </head>
 <body>
 
-<h1>Piano Deluxe Login</h1>
+<div class="card">
+<div class="logo">🎹</div>
+<h1>Piano Deluxe</h1>
+<p>Inicia sesión para guardar progreso, récords y rankings.</p>
 
-<button id="googleLogin">Entrar con Google</button>
+<button onclick="loginGoogle()">
+Entrar con Google
+</button>
+
+<div class="footer">
+JFAM & Co. Piano Studio
+</div>
+</div>
 
 <script type="module">
-import {
-auth,
-provider
-} from "./firebase-config.js";
-
+import { auth, provider } from "./firebase-config.js";
 import {
 signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-document.getElementById("googleLogin").onclick=async()=>{
+window.loginGoogle = async ()=>{
+try{
 await signInWithPopup(auth,provider);
 location.href="menu.html";
-};
+}catch(e){
+alert("Error al iniciar sesión");
+}
+}
 </script>
 
 </body>
