@@ -117,7 +117,9 @@ import { firebaseConfig } from "./firebase-config.js";
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.viewPlayers = async function(){
+window.viewPlayers = function(){
+alert("Botón funcionando");
+}
 const snapshot = await getDocs(collection(db,"users"));
 let lista = "";
 
