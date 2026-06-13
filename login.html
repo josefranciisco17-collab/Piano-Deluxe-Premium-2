@@ -2,90 +2,93 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piano Deluxe Login</title>
 
 <style>
-*{
-box-sizing:border-box;
-}
-
 body{
 margin:0;
-height:100vh;
+padding:0;
+font-family:Arial,sans-serif;
+background:linear-gradient(135deg,#000,#111,#1a1a1a);
+color:white;
 display:flex;
 justify-content:center;
 align-items:center;
-background:
-radial-gradient(circle at top,#1d1d1d,#0b0b0b);
-font-family:Segoe UI;
-color:white;
+height:100vh;
 overflow:hidden;
 }
 
 .card{
-width:92%;
+width:90%;
 max-width:420px;
 padding:35px;
-border-radius:28px;
-background:rgba(255,255,255,.06);
-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,.08);
-box-shadow:
-0 20px 50px rgba(0,0,0,.6);
-animation:fade .8s ease;
-}
-
-@keyframes fade{
-from{
-opacity:0;
-transform:translateY(20px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
+border-radius:30px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+box-shadow:0 0 35px rgba(255,255,255,0.08);
+text-align:center;
+border:1px solid rgba(255,255,255,0.08);
 }
 
 .logo{
-font-size:45px;
-text-align:center;
-margin-bottom:12px;
+font-size:65px;
+margin-bottom:10px;
 }
 
 h1{
-text-align:center;
-margin:0;
-font-size:30px;
+font-size:50px;
+margin:10px 0;
 }
 
 p{
-text-align:center;
-color:#aaa;
+color:#bdbdbd;
 margin-bottom:25px;
+font-size:20px;
+line-height:1.4;
 }
 
 input{
 width:100%;
-padding:15px;
-margin-bottom:14px;
+padding:16px;
+margin:10px 0;
 border:none;
-outline:none;
-border-radius:15px;
-background:#1a1a1a;
+border-radius:18px;
+background:#121212;
 color:white;
-font-size:15px;
-border:1px solid #333;
+font-size:16px;
+box-sizing:border-box;
+outline:none;
+}
+
+.password-box{
+position:relative;
+width:100%;
+}
+
+.password-box input{
+padding-right:55px;
+}
+
+#togglePassword{
+position:absolute;
+right:18px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+font-size:20px;
+color:#aaa;
+user-select:none;
 }
 
 button{
 width:100%;
-padding:15px;
-margin-bottom:12px;
+padding:16px;
+margin:8px 0;
 border:none;
-border-radius:15px;
+border-radius:18px;
+font-size:16px;
 font-weight:bold;
-font-size:15px;
 cursor:pointer;
 transition:.2s;
 }
@@ -94,35 +97,34 @@ button:hover{
 transform:scale(1.02);
 }
 
-.login-btn{
+.btn-login{
 background:white;
 color:black;
 }
 
-.create-btn{
-background:#242424;
+.btn-register{
+background:#222;
 color:white;
 }
 
-.google-btn{
-background:#111;
+.btn-google{
+background:#0d0d0d;
 color:white;
 border:1px solid #333;
 }
 
 .link{
-text-align:center;
-font-size:14px;
+margin-top:15px;
+display:block;
 color:#aaa;
 cursor:pointer;
-margin-top:10px;
+font-size:15px;
 }
 
 .footer{
-margin-top:18px;
-text-align:center;
-font-size:12px;
-color:#777;
+margin-top:25px;
+color:#666;
+font-size:14px;
 }
 </style>
 </head>
@@ -134,27 +136,32 @@ color:#777;
 
 <h1>Piano Deluxe</h1>
 
-<p>Accede para guardar progreso, récords y rankings.</p>
+<p>
+Accede para guardar progreso, récords y rankings.
+</p>
 
-<input id="email" type="email" placeholder="Correo electrónico">
+<input type="email" id="email" placeholder="Correo electrónico">
 
-<input id="password" type="password" placeholder="Contraseña">
+<div class="password-box">
+<input type="password" id="password" placeholder="Contraseña">
+<span id="togglePassword">👁️</span>
+</div>
 
-<button class="login-btn" onclick="loginEmail()">
+<button class="btn-login" onclick="loginEmail()">
 Iniciar sesión
 </button>
 
-<button class="create-btn" onclick="registerEmail()">
+<button class="btn-register" onclick="registerEmail()">
 Crear cuenta
 </button>
 
-<button class="google-btn" onclick="loginGoogle()">
+<button class="btn-google" onclick="loginGoogle()">
 Entrar con Google
 </button>
 
-<div class="link" onclick="resetPassword()">
+<span class="link" onclick="resetPassword()">
 ¿Olvidaste tu contraseña?
-</div>
+</span>
 
 <div class="footer">
 JFAM & Co. Piano Studio
@@ -163,63 +170,177 @@ JFAM & Co. Piano Studio
 </div>
 
 <script type="module">
-import { auth, provider } from "./firebase-config.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
+getAuth,
+GoogleAuthProvider,
 signInWithPopup,
-signInWithEmailAndPassword,
 createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
 sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.loginGoogle=async()=>{
+const firebaseConfig = {
+apiKey: "AIzaSyArKUqthRHDrO1xXn39wJP-JCiBZdilOcY",
+authDomain: "piano-deluxe-premium.firebaseapp.com",
+projectId: "piano-deluxe-premium",
+storageBucket: "piano-deluxe-premium.firebasestorage.app",
+messagingSenderId: "79307845171",
+appId: "1:79307845171:web:c21918694f6d916fbbfd46"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window.loginGoogle = async()=>{
+
 try{
 await signInWithPopup(auth,provider);
+
+localStorage.setItem(
+"loginSuccess",
+"Haz iniciado sesión correctamente 🎹"
+);
+
 location.href="menu.html";
+
 }catch(e){
 alert(e.message);
 }
-}
 
-window.loginEmail=async()=>{
-const email=document.getElementById("email").value;
-const password=document.getElementById("password").value;
+};
+
+window.loginEmail = async()=>{
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value.trim();
+
+if(!email || !password){
+
+alert(
+"Correo y contraseña requeridos para iniciar sesión"
+);
+
+return;
+
+}
 
 try{
-await signInWithEmailAndPassword(auth,email,password);
+
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+localStorage.setItem(
+"loginSuccess",
+"Haz iniciado sesión correctamente 🎹"
+);
+
 location.href="menu.html";
+
 }catch(e){
+
 alert(e.message);
-}
+
 }
 
-window.registerEmail=async()=>{
-const email=document.getElementById("email").value;
-const password=document.getElementById("password").value;
+};
+
+window.registerEmail = async()=>{
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value.trim();
+
+if(!email || !password){
+
+alert(
+"Correo y contraseña requeridos para crear cuenta"
+);
+
+return;
+
+}
 
 try{
-await createUserWithEmailAndPassword(auth,email,password);
-alert("Cuenta creada correctamente");
+
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+alert("Cuenta creada correctamente 🎹");
+
 }catch(e){
+
 alert(e.message);
-}
+
 }
 
-window.resetPassword=async()=>{
-const email=document.getElementById("email").value;
+};
+
+window.resetPassword = async()=>{
+
+const email =
+document.getElementById("email").value.trim();
 
 if(!email){
+
 alert("Escribe tu correo primero");
+
 return;
+
 }
 
 try{
+
 await sendPasswordResetEmail(auth,email);
-alert("Correo de recuperación enviado");
+
+alert(
+"Te enviamos un correo para restablecer tu contraseña 📩"
+);
+
 }catch(e){
+
 alert(e.message);
+
 }
+
+};
+
+const togglePassword =
+document.getElementById("togglePassword");
+
+const passwordInput =
+document.getElementById("password");
+
+togglePassword.onclick=()=>{
+
+if(passwordInput.type==="password"){
+
+passwordInput.type="text";
+togglePassword.textContent="🙈";
+
+}else{
+
+passwordInput.type="password";
+togglePassword.textContent="👁️";
+
 }
+
+};
+
 </script>
 
 </body>
