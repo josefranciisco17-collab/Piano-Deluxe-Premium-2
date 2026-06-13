@@ -6,6 +6,10 @@
 <title>Piano Deluxe Login</title>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
 body{
 margin:0;
 height:100vh;
@@ -13,92 +17,207 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:
-linear-gradient(135deg,#0f0f0f,#1b1b1b,#101010);
+radial-gradient(circle at top,#1d1d1d,#0b0b0b);
 font-family:Segoe UI;
 color:white;
+overflow:hidden;
 }
 
 .card{
-width:90%;
-max-width:380px;
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(14px);
+width:92%;
+max-width:420px;
 padding:35px;
-border-radius:24px;
-text-align:center;
-box-shadow:
-0 15px 40px rgba(0,0,0,.5);
+border-radius:28px;
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(18px);
 border:1px solid rgba(255,255,255,.08);
+box-shadow:
+0 20px 50px rgba(0,0,0,.6);
+animation:fade .8s ease;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 }
 
 .logo{
-font-size:38px;
-margin-bottom:10px;
+font-size:45px;
+text-align:center;
+margin-bottom:12px;
 }
 
 h1{
+text-align:center;
 margin:0;
-font-size:28px;
+font-size:30px;
 }
 
 p{
+text-align:center;
 color:#aaa;
-font-size:14px;
-margin:10px 0 25px;
+margin-bottom:25px;
+}
+
+input{
+width:100%;
+padding:15px;
+margin-bottom:14px;
+border:none;
+outline:none;
+border-radius:15px;
+background:#1a1a1a;
+color:white;
+font-size:15px;
+border:1px solid #333;
 }
 
 button{
 width:100%;
 padding:15px;
+margin-bottom:12px;
 border:none;
-border-radius:16px;
-background:#ffffff;
-color:#111;
-font-size:16px;
+border-radius:15px;
 font-weight:bold;
+font-size:15px;
 cursor:pointer;
 transition:.2s;
 }
 
 button:hover{
-transform:scale(1.03);
+transform:scale(1.02);
+}
+
+.login-btn{
+background:white;
+color:black;
+}
+
+.create-btn{
+background:#242424;
+color:white;
+}
+
+.google-btn{
+background:#111;
+color:white;
+border:1px solid #333;
+}
+
+.link{
+text-align:center;
+font-size:14px;
+color:#aaa;
+cursor:pointer;
+margin-top:10px;
 }
 
 .footer{
-margin-top:20px;
+margin-top:18px;
+text-align:center;
 font-size:12px;
-color:#888;
+color:#777;
 }
 </style>
 </head>
 <body>
 
 <div class="card">
-<div class="logo">🎹</div>
-<h1>Piano Deluxe</h1>
-<p>Inicia sesión para guardar progreso, récords y rankings.</p>
 
-<button onclick="loginGoogle()">
+<div class="logo">🎹</div>
+
+<h1>Piano Deluxe</h1>
+
+<p>Accede para guardar progreso, récords y rankings.</p>
+
+<input id="email" type="email" placeholder="Correo electrónico">
+
+<input id="password" type="password" placeholder="Contraseña">
+
+<button class="login-btn" onclick="loginEmail()">
+Iniciar sesión
+</button>
+
+<button class="create-btn" onclick="registerEmail()">
+Crear cuenta
+</button>
+
+<button class="google-btn" onclick="loginGoogle()">
 Entrar con Google
 </button>
+
+<div class="link" onclick="resetPassword()">
+¿Olvidaste tu contraseña?
+</div>
 
 <div class="footer">
 JFAM & Co. Piano Studio
 </div>
+
 </div>
 
 <script type="module">
 import { auth, provider } from "./firebase-config.js";
+
 import {
-signInWithPopup
+signInWithPopup,
+signInWithEmailAndPassword,
+createUserWithEmailAndPassword,
+sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.loginGoogle = async ()=>{
+window.loginGoogle=async()=>{
 try{
 await signInWithPopup(auth,provider);
 location.href="menu.html";
 }catch(e){
-alert("Error al iniciar sesión");
+alert(e.message);
+}
+}
+
+window.loginEmail=async()=>{
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
+try{
+await signInWithEmailAndPassword(auth,email,password);
+location.href="menu.html";
+}catch(e){
+alert(e.message);
+}
+}
+
+window.registerEmail=async()=>{
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+
+try{
+await createUserWithEmailAndPassword(auth,email,password);
+alert("Cuenta creada correctamente");
+}catch(e){
+alert(e.message);
+}
+}
+
+window.resetPassword=async()=>{
+const email=document.getElementById("email").value;
+
+if(!email){
+alert("Escribe tu correo primero");
+return;
+}
+
+try{
+await sendPasswordResetEmail(auth,email);
+alert("Correo de recuperación enviado");
+}catch(e){
+alert(e.message);
 }
 }
 </script>
