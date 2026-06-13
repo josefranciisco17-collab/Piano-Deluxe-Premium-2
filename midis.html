@@ -46,7 +46,6 @@ getDownloadURL
 async function generarHash(file) {
 const buffer = await file.arrayBuffer();
 const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-
 const hashArray = Array.from(new Uint8Array(hashBuffer));
 
 return hashArray.map(b =>
@@ -97,7 +96,6 @@ cargarBiblioteca();
 
 async function cargarBiblioteca() {
 const biblioteca = document.getElementById("biblioteca");
-
 biblioteca.innerHTML = "";
 
 const snapshot = await getDocs(collection(db, "midis"));
@@ -119,9 +117,7 @@ localStorage.setItem("midiSeleccionado", url);
 alert("MIDI seleccionado");
 };
 
-document
-.getElementById("uploadBtn")
-.onclick = subirMidi;
+document.getElementById("uploadBtn").onclick = subirMidi;
 
 cargarBiblioteca();
 
