@@ -104,38 +104,12 @@ color:white;
 
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-getFirestore,
-collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import { firebaseConfig } from "./firebase-config.js";
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.viewPlayers = function(){
+<script>
+function viewPlayers(){
 alert("Botón funcionando");
 }
-const snapshot = await getDocs(collection(db,"users"));
-let lista = "";
 
-snapshot.forEach((doc)=>{
-const data = doc.data();
-lista += "👤 " + (data.customName || data.email) + "\n";
-});
-
-if(lista === ""){
-lista = "No hay jugadores registrados";
-}
-
-alert(lista);
-}
-
-window.changePassword = function(){
+function changePassword(){
 const newPass = document.getElementById("newPass").value.trim();
 
 if(!newPass){
@@ -143,15 +117,14 @@ alert("Ingresa una contraseña");
 return;
 }
 
-localStorage.setItem("adminPassword",newPass);
+localStorage.setItem("adminPassword", newPass);
 alert("Contraseña actualizada");
 }
 
-window.restorePassword = function(){
+function restorePassword(){
 localStorage.removeItem("adminPassword");
 alert("Contraseña restaurada a Flor 7272");
 }
 </script>
-
 </body>
 </html>
