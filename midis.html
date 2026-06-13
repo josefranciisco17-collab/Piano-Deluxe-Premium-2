@@ -44,14 +44,25 @@ nombre: nombre,
 data: e.target.result
 });
 
-localStorage.setItem("midis", JSON.stringify(midis));
+console.log("Guardando:", midis);
+alert("Intentando guardar MIDI...");
 
+try {
+localStorage.setItem("midis", JSON.stringify(midis));
 alert("MIDI guardado correctamente");
+} catch (error) {
+alert("Error guardando MIDI: " + error.message);
+return;
+}
 
 fileInput.value = "";
 nameInput.value = "";
 
 cargarBiblioteca();
+};
+
+reader.onerror = function() {
+alert("Error leyendo el archivo MIDI");
 };
 
 reader.readAsDataURL(file);
@@ -82,7 +93,7 @@ biblioteca.appendChild(item);
 function seleccionarMidi(index) {
 const midis = JSON.parse(localStorage.getItem("midis")) || [];
 localStorage.setItem("midiSeleccionado", JSON.stringify(midis[index]));
-alert("MIDI seleccionado");
+alert("MIDI seleccionado correctamente");
 }
 
 function eliminarMidi(index) {
@@ -92,7 +103,7 @@ localStorage.setItem("midis", JSON.stringify(midis));
 cargarBiblioteca();
 }
 
-cargarBiblioteca();
+window.onload = cargarBiblioteca;
 </script>
 
 </body>
