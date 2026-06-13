@@ -8,22 +8,40 @@
 </head>
 <body>
 
-<div class="login-container">
-<h1>Piano Deluxe Premium</h1>
-<p>Desarrollado por JFAM & Co. Piano Studio</p>
+<div class="container">
 
-<input type="email" id="email" placeholder="Correo">
+<h1>Piano Deluxe Premium</h1>
+
+<p class="creator">
+Desarrollado por JFAM & Co. Piano Studio
+</p>
+
+<input type="email" id="email" placeholder="Correo electrónico">
+
 <input type="password" id="password" placeholder="Contraseña">
 
-<button id="loginBtn">Iniciar sesión</button>
-<button id="registerBtn">Crear cuenta</button>
-<button id="googleBtn">Continuar con Google</button>
+<button id="loginBtn">
+Iniciar sesión
+</button>
 
-<a href="#">¿Olvidaste tu contraseña?</a>
+<button id="registerBtn">
+Crear cuenta
+</button>
+
+<button id="googleBtn">
+Continuar con Google
+</button>
+
+<span class="link">
+¿Olvidaste tu contraseña?
+</span>
+
 </div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getAuth,
 signInWithEmailAndPassword,
@@ -44,40 +62,71 @@ appId: "1:79307845171:web:c21918694f6d916fbbfd46"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-document.getElementById("loginBtn").onclick = async () => {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
-try {
-await signInWithEmailAndPassword(auth, email, password);
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+const email = emailInput.value.trim();
+const password = passwordInput.value.trim();
+
+if(!email || !password){
+alert("Completa todos los campos");
+return;
+}
+
+try{
+await signInWithEmailAndPassword(auth,email,password);
+
+alert("Inicio de sesión exitoso");
+
 window.location.href = "menu.html";
-} catch (error) {
+
+}catch(error){
 alert(error.message);
 }
-};
 
-document.getElementById("registerBtn").onclick = async () => {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+});
 
-try {
-await createUserWithEmailAndPassword(auth, email, password);
-alert("Cuenta creada");
-} catch (error) {
+document.getElementById("registerBtn").addEventListener("click", async () => {
+
+const email = emailInput.value.trim();
+const password = passwordInput.value.trim();
+
+if(!email || !password){
+alert("Completa todos los campos");
+return;
+}
+
+try{
+await createUserWithEmailAndPassword(auth,email,password);
+
+alert("Cuenta creada correctamente");
+
+}catch(error){
 alert(error.message);
 }
-};
 
-document.getElementById("googleBtn").onclick = async () => {
+});
+
+document.getElementById("googleBtn").addEventListener("click", async () => {
+
+try{
+
 const provider = new GoogleAuthProvider();
 
-try {
-await signInWithPopup(auth, provider);
+await signInWithPopup(auth,provider);
+
+alert("Inicio con Google exitoso");
+
 window.location.href = "menu.html";
-} catch (error) {
+
+}catch(error){
 alert(error.message);
 }
-};
+
+});
+
 </script>
 
 </body>
