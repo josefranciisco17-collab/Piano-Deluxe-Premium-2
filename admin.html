@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Console</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<h1>Admin Console</h1>
+
+<input type="password" id="adminPass" placeholder="Contraseña">
+
+<button id="enterAdmin">
+Entrar
+</button>
+
+<div id="commands" style="display:none;">
+
+<h3>Comandos</h3>
+
+<button onclick="toggleCommand('sustain')">
+Sustain ON/OFF
+</button>
+
+<button onclick="toggleCommand('debug')">
+Debug ON/OFF
+</button>
+
+<button onclick="toggleCommand('visual')">
+Visual Premium
+</button>
+
+<button onclick="toggleCommand('reset')">
+Reset Piano
+</button>
+
+</div>
+
+<button onclick="location.href='menu.html'">
+⬅ Volver
+</button>
+
+</div>
+
+<script>
+
+const adminPassword="Flor7272";
+
+enterAdmin.onclick=()=>{
+
+if(adminPass.value===adminPassword){
+
+commands.style.display="block";
+
+}else{
+alert("Contraseña incorrecta");
+}
+
+};
+
+function toggleCommand(cmd){
+
+localStorage.setItem(cmd,
+localStorage.getItem(cmd)==="true"?"false":"true");
+
+alert(cmd+" cambiado");
+
+}
+
+</script>
+
+</body>
+</html>

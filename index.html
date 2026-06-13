@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piano Deluxe Premium</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+<h1>Piano Deluxe Premium</h1>
+<div class="creator">
+Desarrollado por JFAM & Co. Piano Studio
+</div>
+
+<input type="email" id="email" placeholder="Correo">
+<input type="password" id="password" placeholder="Contraseña">
+
+<button id="loginBtn">Iniciar sesión</button>
+<button id="registerBtn">Crear cuenta</button>
+<button id="googleBtn">Continuar con Google</button>
+
+<span class="link" id="resetBtn">
+¿Olvidaste tu contraseña?
+</span>
+</div>
+
+<script type="module">
+
+import {
+auth,
+provider
+} from "./firebase-config.js";
+
+import {
+signInWithEmailAndPassword,
+createUserWithEmailAndPassword,
+GoogleAuthProvider,
+signInWithPopup,
+sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+
+loginBtn.onclick=async()=>{
+
+try{
+await signInWithEmailAndPassword(
+auth,
+email.value,
+password.value
+);
+
+location.href="menu.html";
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+registerBtn.onclick=async()=>{
+
+try{
+await createUserWithEmailAndPassword(
+auth,
+email.value,
+password.value
+);
+
+alert("Cuenta creada");
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+googleBtn.onclick=async()=>{
+
+try{
+await signInWithPopup(auth,provider);
+
+location.href="menu.html";
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+resetBtn.onclick=async()=>{
+
+if(!email.value){
+alert("Escribe tu correo");
+return;
+}
+
+try{
+await sendPasswordResetEmail(
+auth,
+email.value
+);
+
+alert("Correo enviado");
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+</script>
+
+</body>
+</html>

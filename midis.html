@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis MIDIs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<h1>Mis Canciones MIDIs</h1>
+
+<input type="text" id="midiName" placeholder="Nombre del MIDI">
+
+<button id="saveMidi">
+Guardar MIDI
+</button>
+
+<div id="midiList"></div>
+
+<button onclick="location.href='menu.html'">
+⬅ Volver
+</button>
+
+</div>
+
+<script>
+let midis = JSON.parse(localStorage.getItem("midis")) || [];
+
+function renderMidis(){
+
+const list=document.getElementById("midiList");
+list.innerHTML="";
+
+midis.forEach((midi,index)=>{
+
+list.innerHTML+=&lt;div&gt; ${midi}
+<button onclick="deleteMidi(${index})"&gt;🗑&lt;/button&gt; &lt;/div&gt;;
+
+});
+
+}
+
+function deleteMidi(index){
+midis.splice(index,1);
+localStorage.setItem("midis",JSON.stringify(midis));
+renderMidis();
+}
+
+saveMidi.onclick=()=>{
+
+const name=document.getElementById("midiName").value;
+
+if(!name)return;
+
+midis.push(name);
+
+localStorage.setItem("midis",JSON.stringify(midis));
+
+renderMidis();
+
+};
+
+renderMidis();
+
+</script>
+
+</body>
+</html>
