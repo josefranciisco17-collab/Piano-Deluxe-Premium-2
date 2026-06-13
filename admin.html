@@ -93,7 +93,9 @@ Restablecer Flor 7272
 <div class="section">
 <h2>👤 Player Control</h2>
 
-<button class="white-btn">Ver jugadores</button>
+<button class="white-btn" onclick="viewPlayers()">
+Ver jugadores
+</button>
 <button class="white-btn">Editar rango</button>
 <button class="white-btn">Banear jugador</button>
 <button class="white-btn">Resetear progreso</button>
@@ -140,7 +142,35 @@ Volver
 
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.viewPlayers = async function(){
+const snapshot = await getDocs(collection(db,"users"));
+
+let lista = "";
+
+snapshot.forEach((doc)=>{
+const data = doc.data();
+lista += "👤 " + (data.customName || data.email) + "\n";
+});
+
+if(lista === ""){
+lista = "No hay jugadores registrados";
+}
+
+alert(lista);
+}
 function changePassword(){
 const newPass =
 document.getElementById("newPass").value.trim();
@@ -157,6 +187,12 @@ alert("Contraseña actualizada");
 function restorePassword(){
 localStorage.removeItem("adminPassword");
 alert("Contraseña restaurada a Flor 7272");
+}
+
+
+
+function viewPlayers(){
+alert("Aquí aparecerán los jugadores registrados");
 }
 </script>
 
