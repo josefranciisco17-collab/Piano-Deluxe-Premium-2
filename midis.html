@@ -14,56 +14,85 @@
 <input type="file" id="midiFile" accept=".mid,.midi">
 <input type="text" id="midiName" placeholder="Nombre del MIDI">
 
-<button onclick="subirMIDI()">Guardar MIDI</button>
+<button onclick="guardarMidi()">Guardar MIDI</button>
 <button onclick="window.location.href='menu.html'">← Volver</button>
 
 <h2>Biblioteca</h2>
-<div id="listaMidis"></div>
+<div id="biblioteca"></div>
 </div>
 
-<script type="module">
-import { db, storage } from "./firebase-config.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+<script>
+function guardarMidi() {
+const fileInput = document.getElementById("midiFile");
+const nameInput = document.getElementById("midiName");
 
-window.subirMIDI = async function() {
-const file = document.getElementById("midiFile").files[0];
-const name = document.getElementById("midiName").value;
-
-if (!file || !name) {
-alert("Selecciona un archivo MIDI y escribe un nombre");
+if (!fileInput.files.length) {
+alert("Selecciona un archivo MIDI");
 return;
 }
 
-const storageRef = ref(storage, "midis/" + file.name);
+const file = fileInput.files[0];
+const nombre = nameInput.value.trim() || file.name;
 
-await uploadBytes(storageRef, file);
+const reader = new FileReader();
 
-const url = await getDownloadURL(storageRef);
+reader.onload = function(e) {
+let midis = JSON.parse(localStorage.getItem("midis")) || [];
 
-await addDoc(collection(db, "midis"), {
-nombre: name,
-url: url
+midis.push({
+nombre: nombre,
+data: e.target.result
 });
 
+localStorage.setItem("midis", JSON.stringify(midis));
+
 alert("MIDI guardado correctamente");
-cargarMidis();
+
+fileInput.value = "";
+nameInput.value = "";
+
+cargarBiblioteca();
 };
 
-async function cargarMidis() {
-const lista = document.getElementById("listaMidis");
-lista.innerHTML = "";
+reader.readAsDataURL(file);
+}
 
-const snapshot = await getDocs(collection(db, "midis"));
+function cargarBiblioteca() {
+const biblioteca = document.getElementById("biblioteca");
+const midis = JSON.parse(localStorage.getItem("midis")) || [];
 
-snapshot.forEach(doc => {
-const midi = doc.data();
+biblioteca.innerHTML = "";
 
-lista.innerHTML += &lt;div class="midi-item"&gt; ${midi.nombre} &lt;/div&gt;;
+if (midis.length === 0) {
+biblioteca.innerHTML = "<p>No hay MIDIs guardados.</p>";
+return;
+}
+
+midis.forEach((midi, index) => {
+const item = document.createElement("div");
+item.className = "midi-item";
+
+item.innerHTML = &lt;p&gt;${midi.nombre}</p>
+<button onclick="seleccionarMidi(${index})"&gt;Usar&lt;/button&gt; &lt;button onclick="eliminarMidi(${index})"&gt;Eliminar&lt;/button&gt;;
+
+biblioteca.appendChild(item);
 });
 }
 
-cargarMidis();
+function seleccionarMidi(index) {
+const midis = JSON.parse(localStorage.getItem("midis")) || [];
+localStorage.setItem("midiSeleccionado", JSON.stringify(midis[index]));
+alert("MIDI seleccionado");
+}
+
+function eliminarMidi(index) {
+let midis = JSON.parse(localStorage.getItem("midis")) || [];
+midis.splice(index, 1);
+localStorage.setItem("midis", JSON.stringify(midis));
+cargarBiblioteca();
+}
+
+cargarBiblioteca();
 </script>
 
 </body>
