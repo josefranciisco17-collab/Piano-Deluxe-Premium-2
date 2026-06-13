@@ -3,124 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Biblioteca MIDI</title>
+<title>Biblioteca MIDI Global</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-
 <h1>Biblioteca MIDI Global</h1>
 
 <input type="file" id="midiFile" accept=".mid,.midi">
 <input type="text" id="midiName" placeholder="Nombre del MIDI">
 
 <button id="uploadBtn">Subir MIDI</button>
+<button onclick="window.location.href='menu.html'">← Volver</button>
 
-<div id="biblioteca"></div>
-
-<button onclick="location.href='menu.html'">
-← Volver
-</button>
-
+<h2>Biblioteca</h2>
+<div id="midiList"></div>
 </div>
 
 <script type="module">
-
 import { db, storage } from "./firebase-config.js";
 
 import {
 collection,
-getDocs,
 addDoc,
+getDocs,
 query,
 where
-} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
 ref,
 uploadBytes,
 getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-async function generarHash(file) {
-const buffer = await file.arrayBuffer();
-const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-const hashArray = Array.from(new Uint8Array(hashBuffer));
+const midiFile = document.getElementById("midiFile");
+const midiName = document.getElementById("midiName");
+const uploadBtn = document.getElementById("uploadBtn");
+const midiList = document.getElementById("midiList");
 
-return hashArray.map(b =>
-b.toString(16).padStart(2, "0")
-).join("");
-}
-
-async function subirMidi() {
-const file = document.getElementById("midiFile").files[0];
-const name = document.getElementById("midiName").value.trim();
-
-if (!file || !name) {
-alert("Selecciona un MIDI y pon nombre");
-return;
-}
-
-const hash = await generarHash(file);
-
-const q = query(
-collection(db, "midis"),
-where("hash", "==", hash)
-);
-
-const existing = await getDocs(q);
-
-if (!existing.empty) {
-alert("Este MIDI ya existe en la biblioteca");
-return;
-}
-
-const storageRef = ref(storage, midis/${hash}.mid`);
-
-await uploadBytes(storageRef, file);
-
-const url = await getDownloadURL(storageRef);
-
-await addDoc(collection(db, "midis"), {
-nombre: name,
-hash: hash,
-url: url,
-fecha: Date.now()
-});
-
-alert("MIDI subido correctamente");
-
-cargarBiblioteca();
-}
-
-async function cargarBiblioteca() {
-const biblioteca = document.getElementById("biblioteca");
-biblioteca.innerHTML = "";
+async function loadMidis() {
+midiList.innerHTML = "";
 
 const snapshot = await getDocs(collection(db, "midis"));
 
-snapshot.forEach(doc => {
-const midi = doc.data();
+snapshot.forEach((doc) => {
+const data = doc.data();
 
-biblioteca.innerHTML += &lt;div class="midi-item"&gt; &lt;p&gt;${midi.nombre}</p>
-<button onclick="usarMidi('${midi.url}')">
-Usar
-</button>
-</div>
-`;
+const item = document.createElement("div");
+item.className = "midi-item";
+item.innerHTML = &lt;p&gt;${data.name}</p>
+<a href="${data.url}" target="_blank"&gt;Ver archivo&lt;/a&gt;;
+midiList.appendChild(item);
 });
 }
 
-window.usarMidi = function(url) {
-localStorage.setItem("midiSeleccionado", url);
-alert("MIDI seleccionado");
-};
+uploadBtn.addEventListener("click", async () => {
+try {
+const file = midiFile.files[0];
+const name = midiName.value.trim();
 
-document.getElementById("uploadBtn").onclick = subirMidi;
+if (!file) {
+alert("Selecciona un archivo MIDI");
+return;
+}
 
-cargarBiblioteca();
+if (!name) {
+alert("Escribe un nombre");
+return;
+}
 
+const duplicateQuery = query(
+collection(db, "midis"),
+where("filename", "==", file.name)
+);
+
+const duplicateSnap = await getDocs(duplicateQuery);
+
+if (!duplicateSnap.empty) {
+alert("Ese MIDI ya existe en la biblioteca");
+return;
+}
+
+const storageRef = ref(storage, "midis/" + file.name);
+
+await uploadBytes(storageRef, file);
+
+const downloadURL = await getDownloadURL(storageRef);
+
+await addDoc(collection(db, "midis"), {
+name: name,
+filename: file.name,
+url: downloadURL,
+createdAt: Date.now()
+});
+
+alert("MIDI subido con éxito");
+
+midiFile.value = "";
+midiName.value = "";
+
+loadMidis();
+
+} catch (error) {
+console.error(error);
+alert("Error: " + error.message);
+}
+});
+
+loadMidis();
 </script>
 
 </body>
