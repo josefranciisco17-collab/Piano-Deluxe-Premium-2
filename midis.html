@@ -9,62 +9,61 @@
 <body>
 
 <div class="container">
-
 <h1>Mis Canciones MIDIs</h1>
 
+<input type="file" id="midiFile" accept=".mid,.midi">
 <input type="text" id="midiName" placeholder="Nombre del MIDI">
 
-<button id="saveMidi">
-Guardar MIDI
-</button>
+<button onclick="subirMIDI()">Guardar MIDI</button>
+<button onclick="window.location.href='menu.html'">← Volver</button>
 
-<div id="midiList"></div>
-
-<button onclick="location.href='menu.html'">
-⬅ Volver
-</button>
-
+<h2>Biblioteca</h2>
+<div id="listaMidis"></div>
 </div>
 
-<script>
-let midis = JSON.parse(localStorage.getItem("midis")) || [];
+<script type="module">
+import { db, storage } from "./firebase-config.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-function renderMidis(){
+window.subirMIDI = async function() {
+const file = document.getElementById("midiFile").files[0];
+const name = document.getElementById("midiName").value;
 
-const list=document.getElementById("midiList");
-list.innerHTML="";
+if (!file || !name) {
+alert("Selecciona un archivo MIDI y escribe un nombre");
+return;
+}
 
-midis.forEach((midi,index)=>{
+const storageRef = ref(storage, "midis/" + file.name);
 
-list.innerHTML+=&lt;div&gt; ${midi}
-<button onclick="deleteMidi(${index})"&gt;🗑&lt;/button&gt; &lt;/div&gt;;
+await uploadBytes(storageRef, file);
 
+const url = await getDownloadURL(storageRef);
+
+await addDoc(collection(db, "midis"), {
+nombre: name,
+url: url
 });
 
-}
-
-function deleteMidi(index){
-midis.splice(index,1);
-localStorage.setItem("midis",JSON.stringify(midis));
-renderMidis();
-}
-
-saveMidi.onclick=()=>{
-
-const name=document.getElementById("midiName").value;
-
-if(!name)return;
-
-midis.push(name);
-
-localStorage.setItem("midis",JSON.stringify(midis));
-
-renderMidis();
-
+alert("MIDI guardado correctamente");
+cargarMidis();
 };
 
-renderMidis();
+async function cargarMidis() {
+const lista = document.getElementById("listaMidis");
+lista.innerHTML = "";
 
+const snapshot = await getDocs(collection(db, "midis"));
+
+snapshot.forEach(doc => {
+const midi = doc.data();
+
+lista.innerHTML += &lt;div class="midi-item"&gt; ${midi.nombre} &lt;/div&gt;;
+});
+}
+
+cargarMidis();
 </script>
 
 </body>
