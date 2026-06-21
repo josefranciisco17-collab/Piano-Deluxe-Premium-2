@@ -207,8 +207,7 @@ Desarrollado por JFAM & Co. Piano Studio
 <div class="controls" id="controlsBox">
 
 <button id="pedal">Sustain OFF</button>
-<button id="lockBtn">🔓 Scroll</button>
-
+<button id="menuBtn">🏠 Ir al Menú</button>
 <label for="midiFile">
 Seleccionar MIDI
 </label>
@@ -278,13 +277,9 @@ document.getElementById("pedal").textContent=
 "Sustain "+(sustain?"ON":"OFF");
 };
 
-document.getElementById("lockBtn").onclick=()=>{
-locked=!locked;
-document.getElementById("container").style.overflowX=
-locked?"hidden":"auto";
 
-document.getElementById("lockBtn").textContent=
-locked?"🔒 Lock":"🔓 Scroll";
+document.getElementById("menuBtn").onclick=()=>{
+location.href="menu.html";
 };
 
 const SAMPLE_NOTES=[
