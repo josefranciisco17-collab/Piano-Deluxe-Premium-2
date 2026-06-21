@@ -66,12 +66,7 @@ z-index:999;
 filter:drop-shadow(0 0 10px rgba(255,215,0,.45));
 }
 
-#centerLogo{
-width:55px;
-height:auto;
-margin-bottom:4px;
-filter:drop-shadow(0 0 8px rgba(255,215,0,.45));
-}
+
 
 #mainTitle{
 font-family:"Georgia", serif;
@@ -280,14 +275,7 @@ padding:8px 12px;
 
 <body>
 
-<div id="logoBox">
-  <h2 id="mainTitle">Piano Deluxe Premium</h2>
-  <div id="brandText">JFAM & Co. Piano Studios</div>
-</div>
-<img src="./icon.png" id="middleLogo">
-
 <div class="controls" id="controlsBox">
-
 <button id="pedal">Sustain OFF</button>
 <button id="menuBtn">🏠 Ir al Menú</button>
 <label for="midiFile">Seleccionar MIDI</label>
@@ -297,13 +285,18 @@ padding:8px 12px;
 <button id="playMidi">▶ Reproducir</button>
 
 <input type="file" id="midiFile" accept=".mid,.midi">
+</div>
 
+<img src="./icon.png" id="middleLogo">
+
+<div id="logoBox">
+  <h2 id="mainTitle">Piano Deluxe Premium</h2>
+  <div id="brandText">JFAM & Co. Piano Studios</div>
 </div>
 
 <div class="piano-container" id="container">
-<div class="piano-keyboard" id="keyboard"></div>
+  <div class="piano-keyboard" id="keyboard"></div>
 </div>
-
 <script>
 
 const AudioContextClass=
