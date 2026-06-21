@@ -3,12 +3,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Piano Deluxe Yamaha Premium</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi"></script>
 
 <style>
+
 body{
 margin:0;
 padding:15px;
@@ -16,8 +17,12 @@ background:#121212;
 color:#fff;
 font-family:Segoe UI;
 text-align:center;
-overflow-y:auto;
-overflow-x:hidden;
+overflow:hidden;
+position:fixed;
+width:100%;
+height:100%;
+touch-action:none;
+overscroll-behavior:none;
 }
 
 .controls{
@@ -51,14 +56,17 @@ display:none;
 }
 
 .piano-container{
-overflow-x:auto;
-overflow-y:hidden;
+position:fixed;
+bottom:0;
+left:0;
 width:100%;
 max-width:100vw;
-height:420px;
+height:58vh;
 background:#0a0a0a;
 padding:10px;
 box-sizing:border-box;
+overflow:hidden;
+touch-action:none;
 }
 
 .white{
