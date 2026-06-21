@@ -42,6 +42,34 @@ background:#121212;
 z-index:999;
 }
 
+#logoBox{
+position:fixed;
+top:18px;
+right:15px;
+text-align:right;
+z-index:1000;
+max-width:220px;
+}
+
+#mainTitle{
+font-family: "Georgia", serif;
+font-size:18px;
+font-weight:bold;
+letter-spacing:1px;
+margin:0;
+color:#fff;
+text-shadow:0 0 8px rgba(255,255,255,.15);
+}
+
+#brandText{
+font-family:"Times New Roman", serif;
+font-size:9px;
+letter-spacing:2px;
+color:#c9c9c9;
+margin-top:2px;
+text-transform:uppercase;
+}
+
 h1{
 font-size:28px;
 margin:0;
@@ -227,12 +255,9 @@ padding:8px 12px;
 
 <body>
 
-<h2 id="mainTitle" style="margin-bottom:5px;">
-Piano Deluxe
-</h2>
-
-<div id="brandText" style="margin-bottom:14px;font-size:14px;color:#d0d0d0">
-Desarrollado por JFAM & Co. Piano Studio
+<div id="logoBox">
+  <h2 id="mainTitle">Piano Deluxe Premium</h2>
+  <div id="brandText">JFAM & Co. Piano Studios</div>
 </div>
 
 <div class="controls" id="controlsBox">
