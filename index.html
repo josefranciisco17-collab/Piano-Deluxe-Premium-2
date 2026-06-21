@@ -1,9 +1,644 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta http-equiv="refresh" content="0; url=login.html">
-<title>Redirigiendo...</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Piano Deluxe Yamaha Premium</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi"></script>
+
+<style>
+
+body{
+margin:0;
+padding:15px;
+background:#121212;
+color:#fff;
+font-family:Segoe UI;
+text-align:center;
+overflow-y:auto;
+overflow-x:hidden;
+}
+
+/* CONTROLES */
+
+.controls{
+margin:10px;
+display:flex;
+justify-content:center;
+gap:8px;
+flex-wrap:wrap;
+}
+
+button,label{
+
+padding:10px 16px;
+
+border-radius:22px;
+
+background:#1f1f1f;
+
+color:#fff;
+
+border:1px solid #444;
+
+cursor:pointer;
+
+font-weight:bold;
+
+font-size:13px;
+
+box-shadow:
+inset 0 0 5px rgba(255,255,255,.08),
+0 2px 6px rgba(0,0,0,.4);
+
+}
+
+button:active,
+label:active{
+transform:scale(.96);
+}
+
+input[type=file]{
+display:none;
+}
+
+/* PIANO */
+
+.piano-container{
+
+overflow-x:auto;
+overflow-y:hidden;
+
+background:#0a0a0a;
+
+padding:10px;
+
+border-radius:10px;
+
+touch-action:pan-x;
+
+-webkit-overflow-scrolling:touch;
+
+box-shadow:
+0 0 15px rgba(0,0,0,.5);
+
+}
+
+.piano-keyboard{
+
+display:flex;
+
+position:relative;
+
+width:max-content;
+
+padding-bottom:10px;
+
+}
+
+/* WHITE KEYS */
+
+.key{
+
+width:38px;
+
+height:210px;
+
+background:
+linear-gradient(
+#ffffff,
+#f0f0f0,
+#dcdcdc
+);
+
+border-left:2px solid #000;
+
+border-right:2px solid #000;
+
+border-bottom:2px solid #000;
+
+position:relative;
+
+box-shadow:
+inset 0 0 8px rgba(255,255,255,.8);
+
+box-sizing:border-box;
+
+border-radius:0 0 8px 8px;
+
+transition:.05s;
+
+}
+
+.key.active{
+
+transform:translateY(2px);
+
+background:#d0d0d0;
+
+}
+
+/* BLACK KEYS */
+
+.black{
+
+position:absolute;
+
+width:24px;
+
+height:130px;
+
+background:
+linear-gradient(
+to right,
+#1f1f1f,
+#000,
+#111
+);
+
+z-index:2;
+
+margin-left:-12px;
+
+border:1px solid #000;
+
+box-shadow:
+inset 0 0 4px rgba(255,255,255,0.2);
+
+border-radius:0 0 6px 6px;
+
+}
+
+.black.active{
+background:#333;
+}
+
+/* LABELS */
+
+.label{
+
+position:absolute;
+
+bottom:5px;
+
+left:50%;
+
+transform:translateX(-50%);
+
+font-size:8px;
+
+pointer-events:none;
+
+color:#eee;
+
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+body{
+padding:10px;
+}
+
+h2{
+font-size:38px;
+margin-bottom:10px;
+}
+
+.key{
+width:32px;
+height:180px;
+}
+
+.black{
+width:20px;
+height:105px;
+margin-left:-10px;
+}
+
+button,
+label{
+font-size:11px;
+padding:8px 12px;
+}
+
+}
+
+</style>
 </head>
+
 <body>
+
+<h2 style="margin-bottom:5px;">
+Piano Deluxe
+</h2>
+
+<div style='margin-bottom:14px;font-size:14px;color:#d0d0d0'>
+Desarrollado por JFAM & Co. Piano Studio
+</div>
+
+<div class="controls">
+
+<button id="pedal">
+Sustain OFF
+</button>
+
+<button id="lockBtn">
+🔓 Scroll
+</button>
+
+<label for="midiFile">
+Seleccionar MIDI
+</label>
+
+<input type="file" id="midiFile" accept=".mid,.midi">
+
+<button id="playMidi">
+▶ Reproducir
+</button>
+
+<button id="pauseMidi">
+⏸ Pausar
+</button>
+
+<button id="continueMidi">
+⏩ Continuar
+</button>
+
+</div>
+
+<div class="piano-container" id="container">
+<div class="piano-keyboard" id="keyboard"></div>
+</div>
+
+<script>
+
+const AudioContextClass=
+window.AudioContext||
+window.webkitAudioContext;
+
+let audioCtx;
+
+let sustain=false;
+
+let locked=false;
+
+const cache={};
+
+let midiData=null;
+
+let midiTimeouts=[];
+
+let paused=false;
+
+let pauseTime=0;
+
+let startTime=0;
+
+function initAudio(){
+
+if(!audioCtx)
+audioCtx=new AudioContextClass();
+
+}
+
+document.getElementById("pedal").onclick=()=>{
+
+sustain=!sustain;
+
+document.getElementById("pedal")
+.textContent=
+"Sustain "+(sustain?"ON":"OFF");
+
+};
+
+document.getElementById("lockBtn").onclick=()=>{
+
+locked=!locked;
+
+document.getElementById("container")
+.style.overflowX=
+locked?"hidden":"auto";
+
+document.getElementById("lockBtn")
+.textContent=
+locked?"🔒 Lock":"🔓 Scroll";
+
+};
+
+const SAMPLE_NOTES=[
+"A0","C1","Ds1","Fs1","A1","C2","Ds2","Fs2","A2",
+"C3","Ds3","Fs3","A3","C4","Ds4","Fs4","A4",
+"C5","Ds5","Fs5","A5","C6","Ds6","Fs6","A6",
+"C7","Ds7","Fs7","A7","C8"
+];
+
+function noteToMidi(name){
+
+const map={
+C:0,Cs:1,D:2,Ds:3,E:4,
+F:5,Fs:6,G:7,Gs:8,A:9,
+As:10,B:11
+};
+
+const m=name.match(/^([A-G]s?)(\d)$/);
+
+return (parseInt(m[2])+1)*12+
+map[m[1]];
+
+}
+
+function getBestSample(noteId){
+
+const midi=noteId+21;
+
+let best=SAMPLE_NOTES[0],
+diff=999;
+
+for(const s of SAMPLE_NOTES){
+
+const d=Math.abs(
+midi-noteToMidi(s)
+);
+
+if(d<diff){
+
+diff=d;
+best=s;
+
+}
+
+}
+
+const semitones=
+midi-noteToMidi(best);
+
+return {
+file:`audio/${best}v8.mp3`,
+rate:Math.pow(2,semitones/12)
+};
+
+}
+
+async function loadSample(file){
+
+if(cache[file])
+return cache[file];
+
+const r=await fetch(file);
+
+const b=await r.arrayBuffer();
+
+const a=
+await audioCtx.decodeAudioData(b);
+
+cache[file]=a;
+
+return a;
+
+}
+
+async function playNote(noteId){
+
+initAudio();
+
+const s=getBestSample(noteId);
+
+const buffer=
+await loadSample(s.file);
+
+const src=
+audioCtx.createBufferSource();
+
+src.buffer=buffer;
+
+src.playbackRate.value=s.rate;
+
+const gain=
+audioCtx.createGain();
+
+gain.gain.value=1.0;
+
+src.connect(gain);
+
+gain.connect(audioCtx.destination);
+
+src.start();
+
+if(!sustain){
+
+gain.gain
+.exponentialRampToValueAtTime(
+0.001,
+audioCtx.currentTime+1.5
+);
+
+src.stop(
+audioCtx.currentTime+1.6
+);
+
+}
+
+}
+
+const names=[
+"Do","Do#","Re","Re#",
+"Mi","Fa","Fa#","Sol",
+"Sol#","La","La#","Si"
+];
+
+const keyboard=
+document.getElementById("keyboard");
+
+let white=0;
+
+for(let i=0;i<88;i++){
+
+const note=(i+9)%12;
+
+const oct=
+Math.floor((i+9)/12);
+
+const black=
+names[note].includes("#");
+
+const key=
+document.createElement("div");
+
+key.className=
+"key"+(black?" black":"");
+
+key.dataset.note=i;
+
+const label=
+document.createElement("span");
+
+label.className="label";
+
+label.textContent=
+names[note]+oct;
+
+key.appendChild(label);
+
+if(black){
+
+key.style.left=
+(white*38)+"px";
+
+}else{
+
+white++;
+
+}
+
+key.addEventListener(
+"pointerdown",
+async()=>{
+
+key.classList.add("active");
+
+playNote(i);
+
+setTimeout(
+()=>key.classList.remove("active"),
+120
+);
+
+}
+);
+
+keyboard.appendChild(key);
+
+}
+
+document
+.getElementById("midiFile")
+.addEventListener(
+"change",
+async(e)=>{
+
+const file=e.target.files[0];
+
+if(!file)return;
+
+const buffer=
+await file.arrayBuffer();
+
+midiData=
+new Midi(buffer);
+
+alert("MIDI cargado");
+
+}
+);
+
+function clearMidi(){
+
+midiTimeouts.forEach(
+t=>clearTimeout(t)
+);
+
+midiTimeouts=[];
+
+}
+
+function scheduleMidi(offset=0){
+
+if(!midiData)return;
+
+startTime=Date.now()-offset*1000;
+
+midiData.tracks.forEach(track=>{
+
+track.notes.forEach(n=>{
+
+if(n.time<offset)return;
+
+const noteId=n.midi-21;
+
+const timeout=setTimeout(()=>{
+
+const key=
+document.querySelector(
+'[data-note="'+noteId+'"]'
+);
+
+if(key){
+
+key.classList.add("active");
+
+playNote(noteId);
+
+setTimeout(
+()=>key.classList.remove("active"),
+n.duration*1000
+);
+
+}
+
+},
+(n.time-offset)*1000);
+
+midiTimeouts.push(timeout);
+
+});
+
+});
+
+}
+
+document
+.getElementById("playMidi")
+.onclick=()=>{
+
+if(!midiData){
+
+alert("Selecciona un MIDI");
+
+return;
+
+}
+
+clearMidi();
+
+pauseTime=0;
+
+scheduleMidi(0);
+
+paused=false;
+
+};
+
+document
+.getElementById("pauseMidi")
+.onclick=()=>{
+
+clearMidi();
+
+pauseTime=
+(Date.now()-startTime)/1000;
+
+paused=true;
+
+};
+
+document
+.getElementById("continueMidi")
+.onclick=()=>{
+
+if(!paused)return;
+
+clearMidi();
+
+scheduleMidi(pauseTime);
+
+paused=false;
+
+};
+
+</script>
+
 </body>
 </html>
