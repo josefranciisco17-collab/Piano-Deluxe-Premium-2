@@ -31,15 +31,15 @@ top:0;
 left:0;
 width:100%;
 display:grid;
-grid-template-columns: repeat(4, auto);
-grid-template-rows: repeat(2, auto);
-justify-content:space-between;
+grid-template-columns: auto auto auto;
+grid-template-rows: auto auto;
+justify-content:start;
+gap:8px;
 align-items:center;
 padding:8px 10px;
 box-sizing:border-box;
 background:#121212;
 z-index:999;
-gap:6px;
 }
 
 h1{
@@ -239,15 +239,11 @@ Desarrollado por JFAM & Co. Piano Studio
 
 <button id="pedal">Sustain OFF</button>
 <button id="menuBtn">🏠 Ir al Menú</button>
-
-<label for="midiFile">
-Seleccionar MIDI
-</label>
-
-<button id="playMidi">▶ Reproducir</button>
+<label for="midiFile">Seleccionar MIDI</label>
 
 <button id="pauseMidi">⏸ Pausar</button>
 <button id="continueMidi">⏭ Continuar</button>
+<button id="playMidi">▶ Reproducir</button>
 
 <input type="file" id="midiFile" accept=".mid,.midi">
 
