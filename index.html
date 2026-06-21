@@ -500,7 +500,6 @@ return;
 
 clearMidi();
 pauseTime=0;
-hideUI();
 scheduleMidi(0);
 paused=false;
 
@@ -523,7 +522,6 @@ document.getElementById("continueMidi").onclick=()=>{
 if(!paused)return;
 
 clearMidi();
-hideUI();
 scheduleMidi(pauseTime);
 paused=false;
 
