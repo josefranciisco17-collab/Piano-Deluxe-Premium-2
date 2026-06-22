@@ -131,6 +131,33 @@ Entrar al Piano
 Panel Admin
 </button>
 
+<button class="white-btn" id="midiSectionBtn">
+🎵 Música MIDI
+</button>
+
+<div id="midiPanel" style="display:none; padding:20px;">
+
+<h2>Biblioteca MIDI</h2>
+
+<input type="file" id="uploadMidiInput" accept=".mid,.midi">
+
+<button id="uploadMidiBtn">Subir MIDI</button>
+<button id="refreshMidiBtn">Actualizar MIDIs</button>
+
+<table id="midiTable" border="1" width="100%">
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Usuario</th>
+<th>Fecha</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
+
 <button class="dark-btn" id="logoutBtn">
 Cerrar sesión
 </button>
@@ -154,7 +181,12 @@ import {
 getFirestore,
 doc,
 setDoc,
-getDoc
+getDoc,
+collection,
+addDoc,
+getDocs,
+query,
+where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -183,7 +215,16 @@ const profileInput = document.getElementById("profileInput");
 const userEmail = document.getElementById("userEmail");
 const displayName = document.getElementById("displayName");
 
+const midiSectionBtn = document.getElementById("midiSectionBtn");
+const midiPanel = document.getElementById("midiPanel");
+const uploadMidiInput = document.getElementById("uploadMidiInput");
+const uploadMidiBtn = document.getElementById("uploadMidiBtn");
+const refreshMidiBtn = document.getElementById("refreshMidiBtn");
+const midiTableBody = document.querySelector("#midiTable tbody");
+
 let selectedFile = null;
+let currentMidi = null;
+let midiPaused = false;
 
 onAuthStateChanged(auth, async(user)=>{
 
@@ -305,6 +346,99 @@ alert("Contraseña incorrecta");
 }
 
 };
+
+const midiSectionBtn = document.getElementById("midiSectionBtn");
+const midiPanel = document.getElementById("midiPanel");
+const uploadMidiInput = document.getElementById("uploadMidiInput");
+const uploadMidiBtn = document.getElementById("uploadMidiBtn");
+const refreshMidiBtn = document.getElementById("refreshMidiBtn");
+const midiTableBody = document.querySelector("#midiTable tbody");
+
+let currentMidi = null;
+let midiPaused = false;
+
+midiSectionBtn.onclick = () => {
+if(midiPanel.style.display === "none"){
+midiPanel.style.display = "block";
+}else{
+midiPanel.style.display = "none";
+}
+};
+
+uploadMidiBtn.onclick = async () => {
+const user = auth.currentUser;
+const file = uploadMidiInput.files[0];
+
+if(!file){
+alert("Selecciona un archivo MIDI");
+return;
+}
+
+const q = query(
+collection(db,"midis"),
+where("fileName","==",file.name)
+);
+
+const existing = await getDocs(q);
+
+if(!existing.empty){
+alert("Ese MIDI ya existe");
+return;
+}
+
+const userMidis = query(
+collection(db,"midis"),
+where("userId","==",user.uid)
+);
+
+const userFiles = await getDocs(userMidis);
+
+if(userFiles.size >= 15){
+alert("Máximo 15 MIDIs por usuario");
+return;
+}
+
+const fileRef = ref(storage, "midi_files/" + file.name);
+
+await uploadBytes(fileRef, file);
+
+const url = await getDownloadURL(fileRef);
+
+await addDoc(collection(db,"midis"),{
+fileName: file.name,
+url: url,
+userId: user.uid,
+uploadedAt: new Date()
+});
+
+alert("MIDI subido correctamente 🎹");
+uploadMidiInput.value = "";
+};
+
+
+refreshMidiBtn.onclick = async () => {
+midiTableBody.innerHTML = "";
+
+const snapshot = await getDocs(collection(db,"midis"));
+
+snapshot.forEach((docSnap) => {
+const midi = docSnap.data();
+
+const row = document.createElement("tr");
+
+row.innerHTML = `
+<td>${midi.fileName}</td>
+<td>${midi.userId}</td>
+<td>${new Date(midi.uploadedAt.seconds * 1000).toLocaleString()}</td>
+<td>
+<button onclick="window.open('${midi.url}','_blank')">Descargar</button>
+</td>
+`;
+
+midiTableBody.appendChild(row);
+});
+};
+
 </script>
 
 </body>
