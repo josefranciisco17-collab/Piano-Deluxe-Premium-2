@@ -318,15 +318,15 @@ const brandText=document.getElementById("brandText");
 const controlsBox=document.getElementById("controlsBox");
 
 function hideUI(){
-mainTitle.style.display="none";
-brandText.style.display="none";
-controlsBox.style.display="none";
+    mainTitle.style.visibility="hidden";
+    brandText.style.visibility="hidden";
+    controlsBox.style.visibility="hidden";
 }
 
 function showUI(){
-mainTitle.style.display="block";
-brandText.style.display="block";
-controlsBox.style.display="flex";
+    mainTitle.style.visibility="visible";
+    brandText.style.visibility="visible";
+    controlsBox.style.visibility="visible";
 }
 
 function clearAllLights(){
