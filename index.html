@@ -476,6 +476,7 @@ white++;
 
 key.addEventListener("pointerdown",async(e)=>{
 e.preventDefault();
+e.stopPropagation();
 key.classList.add("active");
 playNote(i);
 
