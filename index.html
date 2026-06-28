@@ -474,7 +474,7 @@ key.style.left=(white*38)+"px";
 white++;
 }
 
-key.addEventListener("pointerdown",async(e)=>{
+key.addEventListener("touchstart", async (e) => {
 e.preventDefault();
 e.stopPropagation();
 key.classList.add("active");
